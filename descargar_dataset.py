@@ -2,7 +2,7 @@ import os
 import shutil
 import kagglehub
 
-def descargar_dataset(destino_carpeta=r"E:\CDD\TP CDD Git\CDD_G6",
+def descargar_dataset(destino_carpeta=r"E:\CDD\TPFINAL\CDD_G6",
                       nombre_csv="TMDB IMDB Movies Dataset.csv"):
     """
     Descarga el dataset de Kaggle usando kagglehub y lo guarda en la carpeta destino.
