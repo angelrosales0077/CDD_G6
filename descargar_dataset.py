@@ -1,31 +1,22 @@
-import os
-import shutil
 import kagglehub
+import os
 
-def descargar_dataset(destino_carpeta=r"E:\CDD\TPFINAL\CDD_G6",
-                      nombre_csv="TMDB IMDB Movies Dataset.csv"):
+def descargar_dataset():
     """
-    Descarga el dataset de Kaggle usando kagglehub y lo guarda en la carpeta destino.
-    Devuelve la ruta completa del CSV.
+    Descarga el dataset de Kaggle usando kagglehub y devuelve la ruta al archivo CSV.
+    kagglehub gestiona la caché, por lo que no es necesario copiar ni borrar nada.
     """
-    # Crear carpeta destino si no existe
-    os.makedirs(destino_carpeta, exist_ok=True)
-    destino = os.path.join(destino_carpeta, nombre_csv)
-
-    # Descargar dataset
+    print("Descargando dataset desde Kaggle Hub...")
+    
+    # KAGGLEHUB_DOWNLOAD_PATH devuelve la carpeta donde se descargó el dataset
     path_cache = kagglehub.dataset_download("ggtejas/tmdb-imdb-merged-movies-dataset")
-    print("Dataset descargado en:", path_cache)
-
-    # Copiar CSV desde cache a destino
+    
+    # Buscamos el archivo CSV dentro de la carpeta descargada
     for archivo in os.listdir(path_cache):
         if archivo.endswith(".csv"):
-            origen = os.path.join(path_cache, archivo)
-            shutil.copy(origen, destino)
-            print(f"Archivo copiado a: {destino}")
-            break
-
-    # Borrar carpeta cache
-    shutil.rmtree(path_cache, ignore_errors=True)
-    print("Carpeta cache eliminada ✅")
-
-    return destino
+            ruta_csv = os.path.join(path_cache, archivo)
+            print(f"✅ Dataset disponible en: {ruta_csv}")
+            return ruta_csv
+            
+    # Si no se encuentra el CSV, lanzamos un error
+    raise FileNotFoundError("No se encontró ningún archivo .csv en el dataset descargado.")
