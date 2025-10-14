@@ -14,7 +14,7 @@ def configurar_visualizaciones():
     """Establece un tema visual consistente para todos los gráficos."""
     sns.set_theme(style="whitegrid", palette="muted", context="talk")
     plt.rcParams['figure.figsize'] = (14, 8)
-    print("🎨 Tema visual configurado.")
+    print(" Tema visual configurado.")
 
 def cargar_datos():
     """Descarga y carga el dataset en un DataFrame de Pandas."""
@@ -25,7 +25,7 @@ def cargar_datos():
         print(df.head())
         return df
     except Exception as e:
-        print(f"❌ Error al cargar los datos: {e}")
+        print(f" Error al cargar los datos: {e}")
         return None
 
 # ================================
@@ -36,7 +36,7 @@ def analizar_faltantes(df):
     print("\n--- 3. ANÁLISIS DE VALORES FALTANTES (DATASET ORIGINAL) ---")
     df_nulos = df.copy()
     
-    cols_ceros_como_nulos = ["revenue", "budget", "runtime", "averageRating", "numVotes"]
+    cols_ceros_como_nulos = ["revenue", "budget", "runtime", "averageRating", "numVotes","vote_average","vote_count"]
     df_nulos[cols_ceros_como_nulos] = df_nulos[cols_ceros_como_nulos].replace(0, np.nan)
     
     faltantes_df = df_nulos.isnull().sum().reset_index()
@@ -177,7 +177,7 @@ def crear_dataset_reducido(df):
     print("\n--- 8. CREACIÓN DEL DATASET REDUCIDO ---")
     df_limpio = df.copy()
     
-    cols_ceros_nan = ["revenue", "budget", "runtime", "averageRating", "numVotes"]
+    cols_ceros_nan = ["revenue", "budget", "vote_average", "vote_count", "runtime", "averageRating", "numVotes"]
     df_limpio[cols_ceros_nan] = df_limpio[cols_ceros_nan].replace(0, np.nan)
 
     cols_a_eliminar = ["budget", "revenue", "tagline", "poster_path", "backdrop_path", "homepage"]
@@ -185,7 +185,9 @@ def crear_dataset_reducido(df):
     df_limpio = df_limpio.drop(columns=cols_a_eliminar, errors="ignore")
     print("Columnas eliminadas.")
     
-    cols_clave_nulos = ["vote_average", "vote_count", "release_date", "genres", "runtime"]
+    cols_clave_nulos = ["vote_average", "vote_count", "release_date", "genres",
+              "production_countries", "overview", "production_companies", "spoken_languages", "keywords",
+              "directors", "writers", "cast","runtime"]
     df_limpio = df_limpio.dropna(subset=cols_clave_nulos)
     print(f"Filas restantes tras eliminar nulos en columnas clave: {df_limpio.shape[0]}")
     
@@ -201,11 +203,11 @@ def crear_dataset_reducido(df):
         df_reducido = df_final.sample(n=20000, random_state=42)
     else:
         df_reducido = df_final
-        print(f"⚠️ Advertencia: El dataset final tiene {df_final.shape[0]} registros, menos de los 10,000 esperados.")
+        print(f" Advertencia: El dataset final tiene {df_final.shape[0]} registros, menos de los 10,000 esperados.")
 
     ruta_salida = "movies_dataset_reducido.csv"
     df_reducido.to_csv(ruta_salida, index=False)
-    print(f"\n✅ Dataset reducido con {df_reducido.shape[0]} registros guardado en: '{ruta_salida}'")
+    print(f"\n Dataset reducido con {df_reducido.shape[0]} registros guardado en: '{ruta_salida}'")
     
     return ruta_salida
 
@@ -227,9 +229,9 @@ def analizar_dataset_reducido(ruta_csv_reducido):
         sin_faltantes = faltantes_reducido[faltantes_reducido["Cantidad de Nulos"] == 0]
 
         if con_faltantes.empty:
-            print("\n✅ ¡Excelente! No se detectaron valores faltantes en el dataset reducido.")
+            print("\n ¡Excelente! No se detectaron valores faltantes en el dataset reducido.")
         else:
-            print("\n⚠️ Se detectaron valores faltantes en el dataset reducido:")
+            print("\n Se detectaron valores faltantes en el dataset reducido:")
             print(con_faltantes.sort_values(by="Cantidad de Nulos", ascending=False))
             
             plt.figure(figsize=(16, 8))
@@ -250,12 +252,12 @@ def analizar_dataset_reducido(ruta_csv_reducido):
         print(df_reducido.head())
 
     except FileNotFoundError:
-        print(f"❌ Error: No se encontró el archivo del dataset reducido en la ruta '{ruta_csv_reducido}'")
+        print(f" Error: No se encontró el archivo del dataset reducido en la ruta '{ruta_csv_reducido}'")
 
 # ================================
 # SCRIPT PRINCIPAL
 # ================================
-if __name__ == "__main__":
+if _name_ == "_main_":
     configurar_visualizaciones()
     df_original = cargar_datos()
     
