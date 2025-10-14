@@ -230,6 +230,13 @@ def analizar_dataset_reducido(ruta_csv_reducido):
 
         if con_faltantes.empty:
             print("\n ¡Excelente! No se detectaron valores faltantes en el dataset reducido.")
+            # Mostrar mapa de nulos igualmente para verificación (estará vacío)
+            plt.figure(figsize=(16, 8))
+            sns.heatmap(df_reducido.isnull(), cbar=False, cmap="plasma")
+            plt.title("Mapa de Valores Faltantes (Dataset Reducido) — No se detectaron nulos", fontsize=18, weight='bold')
+            plt.xticks(rotation=45, ha='right', fontsize=10)
+            plt.tight_layout()
+            plt.show()
         else:
             print("\n Se detectaron valores faltantes en el dataset reducido:")
             print(con_faltantes.sort_values(by="Cantidad de Nulos", ascending=False))
@@ -257,7 +264,7 @@ def analizar_dataset_reducido(ruta_csv_reducido):
 # ================================
 # SCRIPT PRINCIPAL
 # ================================
-if _name_ == "_main_":
+if __name__ == "__main__":
     configurar_visualizaciones()
     df_original = cargar_datos()
     
