@@ -28,6 +28,7 @@ def cargar_datos():
         print(f" Error al cargar los datos: {e}")
         return None
 
+
 # ================================
 # 3. ANÁLISIS DE VALORES FALTANTES (DATASET ORIGINAL)
 # ================================
@@ -173,7 +174,9 @@ def generar_visualizaciones(df):
 # 8. CREACIÓN DEL DATASET REDUCIDO
 # ================================
 def crear_dataset_reducido(df):
-    """Limpia el dataset, guarda una versión reducida y devuelve la ruta del archivo guardado."""
+    """Limpia el dataset, guarda una versión reducida y devuelve la ruta del archivo guardado.
+    Nota: no se eliminan outliers; se conservan todos los registros tras la limpieza de columnas y nulos.
+    """
     print("\n--- 8. CREACIÓN DEL DATASET REDUCIDO ---")
     df_limpio = df.copy()
     
@@ -191,19 +194,14 @@ def crear_dataset_reducido(df):
     df_limpio = df_limpio.dropna(subset=cols_clave_nulos)
     print(f"Filas restantes tras eliminar nulos en columnas clave: {df_limpio.shape[0]}")
     
-    Q1, Q3 = df_limpio["vote_average"].quantile(0.25), df_limpio["vote_average"].quantile(0.75)
-    IQR = Q3 - Q1
-    lim_inf, lim_sup = Q1 - 1.5 * IQR, Q3 + 1.5 * IQR
-    df_final = df_limpio[(df_limpio["vote_average"] >= lim_inf) & (df_limpio["vote_average"] <= lim_sup)]
-    print(f"Filas restantes tras limpiar outliers en 'vote_average': {df_final.shape[0]}")
-
-    if 10000 <= df_final.shape[0] <= 20000:
-        df_reducido = df_final
-    elif df_final.shape[0] > 20000:
-        df_reducido = df_final.sample(n=20000, random_state=42)
+    # NO se eliminan outliers; se conserva df_limpio completo (o se muestrea si es muy grande)
+    if 10000 <= df_limpio.shape[0] <= 20000:
+        df_reducido = df_limpio
+    elif df_limpio.shape[0] > 20000:
+        df_reducido = df_limpio.sample(n=20000, random_state=42)
     else:
-        df_reducido = df_final
-        print(f" Advertencia: El dataset final tiene {df_final.shape[0]} registros, menos de los 10,000 esperados.")
+        df_reducido = df_limpio
+        print(f" Advertencia: El dataset final tiene {df_limpio.shape[0]} registros, menos de los 10,000 esperados.")
 
     ruta_salida = "movies_dataset_reducido.csv"
     df_reducido.to_csv(ruta_salida, index=False)
@@ -256,6 +254,7 @@ def analizar_dataset_reducido(ruta_csv_reducido):
         print(df_reducido.columns.tolist())
         
         print("\nPrimeras filas del dataset reducido:")
+        
         print(df_reducido.head())
 
     except FileNotFoundError:
