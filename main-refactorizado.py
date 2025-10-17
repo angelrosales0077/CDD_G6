@@ -254,53 +254,40 @@ def generar_visualizaciones(df):
 # 8. CREACIÓN DEL DATASET REDUCIDO
 # ================================
 def crear_dataset_reducido(df):
-    """Limpia el dataset, guarda una versión reducida y devuelve la ruta del archivo guardado."""
+    """Limpia el dataset, guarda una versión reducida y devuelve la ruta del archivo guardado.
+    Nota: no se eliminan outliers; se conservan todos los registros tras la limpieza de columnas y nulos.
+    """
     print("\n--- 8. CREACIÓN DEL DATASET REDUCIDO ---")
     df_limpio = df.copy()
-
-    cols_ceros_nan = ["revenue", "budget", "vote_average", "vote_count",
-                      "runtime", "averageRating", "numVotes"]
-    cols_ceros_presentes = [c for c in cols_ceros_nan if c in df_limpio.columns]
-    if cols_ceros_presentes:
-        df_limpio[cols_ceros_presentes] = df_limpio[cols_ceros_presentes].replace(0, np.nan)
+    
+    cols_ceros_nan = ["revenue", "budget", "vote_average", "vote_count", "runtime", "averageRating", "numVotes"]
+    df_limpio[cols_ceros_nan] = df_limpio[cols_ceros_nan].replace(0, np.nan)
 
     cols_a_eliminar = ["budget", "revenue", "tagline", "poster_path", "backdrop_path", "homepage"]
     print(f"\nColumnas a eliminar: {cols_a_eliminar}")
     df_limpio = df_limpio.drop(columns=cols_a_eliminar, errors="ignore")
-    print("✔ Columnas eliminadas.")
-
+    print("Columnas eliminadas.")
+    
     cols_clave_nulos = ["vote_average", "vote_count", "release_date", "genres",
-                        "production_countries", "overview", "production_companies",
-                        "spoken_languages", "keywords", "directors", "writers", "cast", "runtime"]
-    cols_clave_presentes = [c for c in cols_clave_nulos if c in df_limpio.columns]
-    df_limpio = df_limpio.dropna(subset=cols_clave_presentes)
-    print(f"✔ Filas restantes tras eliminar nulos en columnas clave: {df_limpio.shape[0]}")
-
-    # Filtrado de outliers por IQR en vote_average (igual que tu lógica original)
-    if "vote_average" in df_limpio.columns:
-        Q1, Q3 = df_limpio["vote_average"].quantile(0.25), df_limpio["vote_average"].quantile(0.75)
-        IQR = Q3 - Q1
-        lim_inf, lim_sup = Q1 - 1.5 * IQR, Q3 + 1.5 * IQR
-        df_final = df_limpio[(df_limpio["vote_average"] >= lim_inf) & (df_limpio["vote_average"] <= lim_sup)]
-        print(f"✔ Filas tras limpiar outliers en 'vote_average': {df_final.shape[0]}")
+              "production_countries", "overview", "production_companies", "spoken_languages", "keywords",
+              "directors", "writers", "cast","runtime"]
+    df_limpio = df_limpio.dropna(subset=cols_clave_nulos)
+    print(f"Filas restantes tras eliminar nulos en columnas clave: {df_limpio.shape[0]}")
+    
+    # NO se eliminan outliers; se conserva df_limpio completo (o se muestrea si es muy grande)
+    if 10000 <= df_limpio.shape[0] <= 20000:
+        df_reducido = df_limpio
+    elif df_limpio.shape[0] > 20000:
+        df_reducido = df_limpio.sample(n=20000, random_state=42)
     else:
-        df_final = df_limpio
-
-    # Ajuste a rango 10k–20k
-    if 10000 <= df_final.shape[0] <= 20000:
-        df_reducido = df_final
-    elif df_final.shape[0] > 20000:
-        df_reducido = df_final.sample(n=20000, random_state=42)
-    else:
-        df_reducido = df_final
-        print(f"⚠ Advertencia: El dataset final tiene {df_final.shape[0]} registros, menos de los 10,000 esperados.")
+        df_reducido = df_limpio
+        print(f" Advertencia: El dataset final tiene {df_limpio.shape[0]} registros, menos de los 10,000 esperados.")
 
     ruta_salida = "movies_dataset_reducido.csv"
     df_reducido.to_csv(ruta_salida, index=False)
-    print(f"\n✔ Dataset reducido con {df_reducido.shape[0]} registros guardado en: '{ruta_salida}'")
-
+    print(f"\n Dataset reducido con {df_reducido.shape[0]} registros guardado en: '{ruta_salida}'")
+    
     return ruta_salida
-
 # ================================
 # 9. ANÁLISIS DEL DATASET REDUCIDO
 # ================================
