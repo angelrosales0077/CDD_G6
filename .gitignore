@@ -1,4 +1,70 @@
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+env/
+venv/
+.venv/
+env.bak/
+venv.bak/
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs, temporary files
+*.log
+*.tmp
+*.bak
+
+# Databases
+*.sqlite3
+*.db
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Caches
+.cache/
+
+# Model / preprocessor artifacts (binary, large)
+*.joblib
+*.pkl
+*.model
+*.h5
+
+# Project-specific generated files and large datasets
 TMDB IMDB Movies Dataset.csv
-README.md
-__pycache__
-.ipynb_checkpoints
+movies_dataset_reducido.csv
+movies_dataset_fe_mlb_5actors.csv
+preprocessor_mlb_5actors.joblib
+models_saved/
+results_summary.csv
+
+# Environment / secrets
+.env
+credentials.json
+secrets.json
+
+# Optional: track large binary data with Git LFS instead of ignoring
+# git lfs install
+# git lfs track "*.csv"
+# git add .gitattributes

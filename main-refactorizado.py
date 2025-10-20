@@ -254,9 +254,7 @@ def generar_visualizaciones(df):
 # 8. CREACIÓN DEL DATASET REDUCIDO
 # ================================
 def crear_dataset_reducido(df):
-    """Limpia el dataset, guarda una versión reducida y devuelve la ruta del archivo guardado.
-    Nota: no se eliminan outliers; se conservan todos los registros tras la limpieza de columnas y nulos.
-    """
+    """Limpia el dataset, guarda una versión reducida sin limitar la cantidad de registros y devuelve la ruta del archivo guardado."""
     print("\n--- 8. CREACIÓN DEL DATASET REDUCIDO ---")
     df_limpio = df.copy()
     
@@ -268,26 +266,23 @@ def crear_dataset_reducido(df):
     df_limpio = df_limpio.drop(columns=cols_a_eliminar, errors="ignore")
     print("Columnas eliminadas.")
     
-    cols_clave_nulos = ["vote_average", "vote_count", "release_date", "genres",
-              "production_countries", "overview", "production_companies", "spoken_languages", "keywords",
-              "directors", "writers", "cast","runtime"]
+    cols_clave_nulos = [
+        "vote_average", "vote_count", "release_date", "genres",
+        "production_countries", "overview", "production_companies", "spoken_languages", "keywords",
+        "directors", "writers", "cast", "runtime"
+    ]
     df_limpio = df_limpio.dropna(subset=cols_clave_nulos)
     print(f"Filas restantes tras eliminar nulos en columnas clave: {df_limpio.shape[0]}")
-    
-    # NO se eliminan outliers; se conserva df_limpio completo (o se muestrea si es muy grande)
-    if 10000 <= df_limpio.shape[0] <= 20000:
-        df_reducido = df_limpio
-    elif df_limpio.shape[0] > 20000:
-        df_reducido = df_limpio.sample(n=20000, random_state=42)
-    else:
-        df_reducido = df_limpio
-        print(f" Advertencia: El dataset final tiene {df_limpio.shape[0]} registros, menos de los 10,000 esperados.")
+
+    # ✅ Ya no se limita la cantidad de registros
+    df_reducido = df_limpio
 
     ruta_salida = "movies_dataset_reducido.csv"
     df_reducido.to_csv(ruta_salida, index=False)
     print(f"\n Dataset reducido con {df_reducido.shape[0]} registros guardado en: '{ruta_salida}'")
     
     return ruta_salida
+
 # ================================
 # 9. ANÁLISIS DEL DATASET REDUCIDO
 # ================================
