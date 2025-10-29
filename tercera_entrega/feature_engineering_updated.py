@@ -53,6 +53,11 @@ def top_k_or_minfreq_replace(series, min_freq=MIN_FREQ):
 # Feature engineering principal
 # ---------------------------
 def engineer_features(df, min_freq=MIN_FREQ, extract_actors_n=5):
+    # Evitar duplicados / fuga: si existe averageRating (igual a vote_average) la eliminamos
+    if 'averageRating' in df.columns:
+        df = df.copy()  # trabajar sobre copia
+        df.drop(columns=['averageRating'], inplace=True)
+
     # 1) release_date -> release_year, release_month
     df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
     df['release_year'] = df['release_date'].dt.year
@@ -105,7 +110,7 @@ def engineer_features(df, min_freq=MIN_FREQ, extract_actors_n=5):
     # 8) Selección final de features (ajustá según lo que quieras usar)
     feature_cols = [
         # numéricas
-        'runtime', 'popularity', 'vote_count', 'numVotes', 'averageRating', 'release_year', 'release_month', 'adult',
+        'runtime', 'popularity', 'vote_count', 'numVotes', 'release_year', 'release_month', 'adult',
         # categóricas
         'original_language','status','production_country_main','spoken_language_main'
     ]
