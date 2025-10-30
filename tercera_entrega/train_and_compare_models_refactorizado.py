@@ -178,6 +178,106 @@ X_train_trans_reg = preprocessor_fitted.transform(X_train_reg)
 X_val_trans_reg = preprocessor_fitted.transform(X_val_reg)
 X_test_trans_reg = preprocessor_fitted.transform(X_test)
 
+
+# ===============================================
+# 3.2.1 Búsqueda de Hiperparámetros XGBoost
+# ===============================================
+
+# Conjuntos de parámetros a evaluar
+xgb_params_list = [
+    {"n_estimators": 500, "learning_rate": 0.1, "max_depth": 5},
+    {"n_estimators": 800, "learning_rate": 0.05, "max_depth": 7},
+    {"n_estimators": 1200, "learning_rate": 0.03, "max_depth": 8}
+]
+
+xgb_results = []
+best_rmse = float("inf")
+best_model = None
+best_name = None
+
+print("\n===== INICIO DE BÚSQUEDA XGBOOST (Regresión) =====")
+
+for i, params in enumerate(xgb_params_list, start=1):
+    print(f"\nEntrenando XGBoost versión {i} con parámetros: {params}")
+
+    model = XGBRegressor(
+        objective="reg:squarederror",
+        subsample=0.8,
+        colsample_bytree=0.8,
+        n_jobs=-1,
+        random_state=RANDOM_STATE,
+        early_stopping_rounds=50,
+        verbosity=0,
+        **params
+    )
+
+    model.fit(
+        X_train_trans_reg, y_train_reg,
+        eval_set=[(X_val_trans_reg, y_val_reg)],
+        verbose=False
+    )
+
+    y_pred = model.predict(X_test_trans_reg)
+    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+    r2 = r2_score(y_test, y_pred)
+
+    print(f"Versión {i} -> RMSE={rmse:.4f}, R²={r2:.4f}")
+
+    xgb_results.append({
+        "version": i,
+        "n_estimators": params["n_estimators"],
+        "learning_rate": params["learning_rate"],
+        "max_depth": params["max_depth"],
+        "rmse": rmse,
+        "r2": r2
+    })
+
+    # Guardar cada modelo (opcional)
+    joblib.dump(model, os.path.join(OUTPUT_MODELS_DIR, f"xgboost_v{i}.joblib"))
+
+    # Actualizar mejor modelo
+    if rmse < best_rmse:
+        best_rmse = rmse
+        best_model = model
+        best_name = f"xgboost_v{i}"
+
+# Guardar el mejor modelo
+if best_model:
+    joblib.dump(best_model, os.path.join(OUTPUT_MODELS_DIR, f"{best_name}_best.joblib"))
+    print(f"\n✅ Mejor modelo: {best_name}_best.joblib (RMSE={best_rmse:.4f})")
+
+# --------------------------------------------
+# Guardar resultados y graficar comparaciones
+# --------------------------------------------
+xgb_results_df = pd.DataFrame(xgb_results)
+xgb_results_df.to_csv(os.path.join(OUTPUT_MODELS_DIR, "xgboost_param_results.csv"), index=False)
+print(f"\nResultados guardados en: models_saved/xgboost_param_results.csv")
+
+# --- Gráfico RMSE ---
+plt.figure(figsize=(8, 5))
+sns.barplot(data=xgb_results_df, x="version", y="rmse", palette="Reds_r")
+plt.title("Comparación de RMSE entre configuraciones XGBoost", fontsize=14)
+plt.xlabel("Versión del modelo")
+plt.ylabel("RMSE (menor es mejor)")
+plt.tight_layout()
+plt.savefig(os.path.join(OUTPUT_MODELS_DIR, "xgboost_rmse_comparison.png"))
+plt.show()
+
+# --- Gráfico R² ---
+plt.figure(figsize=(8, 5))
+sns.barplot(data=xgb_results_df, x="version", y="r2", palette="Greens_r")
+plt.title("Comparación de R² entre configuraciones XGBoost", fontsize=14)
+plt.xlabel("Versión del modelo")
+plt.ylabel("R² (mayor es mejor)")
+plt.tight_layout()
+plt.savefig(os.path.join(OUTPUT_MODELS_DIR, "xgboost_r2_comparison.png"))
+plt.show()
+
+print("\n===== FIN DE BÚSQUEDA XGBOOST =====")
+print(xgb_results_df)
+
+
+
 model_path_xgb = os.path.join(OUTPUT_MODELS_DIR, "xgboost.joblib")
 train_time_xgb = 0
 
