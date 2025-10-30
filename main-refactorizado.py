@@ -254,7 +254,8 @@ def generar_visualizaciones(df):
 # 8. CREACIÓN DEL DATASET REDUCIDO
 # ================================
 def crear_dataset_reducido(df):
-    """Limpia el dataset, guarda una versión reducida sin limitar la cantidad de registros y devuelve la ruta del archivo guardado."""
+    """Limpia el dataset, guarda una versión reducida sin limitar la cantidad de registros
+    y además guarda una versión muestreada con como máximo 20k filas."""
     print("\n--- 8. CREACIÓN DEL DATASET REDUCIDO ---")
     df_limpio = df.copy()
     
@@ -274,13 +275,25 @@ def crear_dataset_reducido(df):
     df_limpio = df_limpio.dropna(subset=cols_clave_nulos)
     print(f"Filas restantes tras eliminar nulos en columnas clave: {df_limpio.shape[0]}")
 
-    # ✅ Ya no se limita la cantidad de registros
+    # ✅ Versión completa (sin limitar registros)
     df_reducido = df_limpio
 
     ruta_salida = "movies_dataset_reducido.csv"
     df_reducido.to_csv(ruta_salida, index=False)
     print(f"\n Dataset reducido con {df_reducido.shape[0]} registros guardado en: '{ruta_salida}'")
     
+    # --- Crear y guardar versión muestreada (máx 20k filas) ---
+    max_rows = 20000
+    sampled_path = "movies_dataset_reducido_20k.csv"
+    if df_reducido.shape[0] > max_rows:
+        df_sample = df_reducido.sample(n=max_rows, random_state=42).reset_index(drop=True)
+        df_sample.to_csv(sampled_path, index=False)
+        print(f"Versión muestreada (max {max_rows} filas) guardada en: '{sampled_path}' ({df_sample.shape[0]} filas)")
+    else:
+        # si ya es menor que max_rows, guardar copia rápida
+        df_reducido.to_csv(sampled_path, index=False)
+        print(f"Versión muestreada (no truncada) guardada en: '{sampled_path}' ({df_reducido.shape[0]} filas)")
+
     return ruta_salida
 
 # ================================
